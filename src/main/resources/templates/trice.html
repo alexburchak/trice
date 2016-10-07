@@ -1,0 +1,164 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-spring4-4.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta http-equiv="cache-control" content="max-age=0" />
+    <meta http-equiv="cache-control" content="no-cache" />
+    <meta http-equiv="expires" content="0" />
+    <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+    <meta http-equiv="pragma" content="no-cache" />
+
+    <link type="text/css" rel="stylesheet" href="/stylesheet.css"/>
+
+    <script src="/jquery-3.1.1.js"></script>
+    <script src="/sockjs-0.3.4.js"></script>
+
+    <script type="text/javascript" th:inline="javascript">
+        var ws = null;
+        var recInterval = null;
+
+        function connect() {
+            if (ws == null) {
+                ws = new SockJS([[${endpoint}]]);
+
+                ws.onopen = function () {
+                    console.log('Info: WebSocket connection opened');
+
+                    ws.send("TRICE [[${sid}]]");
+                };
+                ws.onmessage = function (message) {
+                    console.log('Received: ' + message.data);
+
+                    var length = message.data.indexOf(" ");
+                    var command = message.data.slice(0, length);
+                    var body = message.data.slice(Math.max(length, 0));
+
+                    handler[command](body);
+                };
+                ws.onclose = function () {
+                    console.log('Info: WebSocket connection closed');
+
+                    ws = null;
+
+                    clearInterval(recInterval);
+
+                    recInterval = setInterval(connect, 1000);
+                };
+            }
+        }
+
+        var handler = {
+            "TRICE": function(command) {
+                console.log(command);
+            },
+            "ECIRT": function(command) {
+                ws.close();
+            },
+            "REQUEST": function(command) {
+                var json = $.parseJSON(command);
+
+                var hidden = $.find("div #hidden");
+                var element = $(hidden).find("div.element").clone();
+
+                element.find("div.method").text(json["method"]);
+                element.find("div.url").text(json["url"]);
+                element.find("div.remote-address").text(json["remoteAddr"]);
+                element.find("div.remote-host").text(json["remoteHost"]);
+                element.find("div.remote-port").text(json["remotePort"]);
+                element.find("div.remote-user").text(json["remoteUser"]);
+
+                for (name in json.parameters) {
+                    var param = $(hidden).find("div.param").clone();
+                    param.text(json.parameters[name].name + "=" + json.parameters[name].value);
+
+                    element.find("div.params").append(param);
+                }
+
+                for (name in json.headers) {
+                    var header = $(hidden).find("div.header").clone();
+                    header.text(json.headers[name].name + "=" + json.headers[name].value);
+
+                    element.find("div.headers").append(header);
+                }
+
+                for (name in json.cookies) {
+                    var cookie = $(hidden).find("div.cookie").clone();
+                    cookie.text(json.cookies[name].name + "=" + json.cookies[name].value);
+
+                    element.find("div.cookies").append(cookie);
+                }
+
+                element.prependTo("#container");
+
+                element.fadeIn(1500);
+            }
+        }
+    </script>
+
+    <title>Trice(ratops)</title>
+</head>
+
+<body onload="connect();">
+<noscript>
+    <h2 style="color: #ff0000" th:text="#{message.javascript.disabled}"></h2>
+</noscript>
+
+<div class="logo">
+    <img src="/logo.png" class="logo-img"/>
+    <nobr><div class="logo-text" th:text="#{message.welcome.to.trice}"></div></nobr>
+</div>
+
+<div>
+    <div id="hidden" style="display: none">
+        <div class="param value2">
+        </div>
+        <div class="header value2">
+        </div>
+        <div class="cookie value2">
+        </div>
+        <div class="fading element">
+            <div>
+                <div class="name inline-block">METHOD:</div>
+                <div class="method value inline-block"></div>
+            </div>
+            <div>
+                <div class="name inline-block">URL:</div>
+                <div class="url value inline-block"></div>
+            </div>
+            <div>
+                <div class="name inline-block">REMOTE ADDRESS:</div>
+                <div class="remote-address value inline-block"></div>
+            </div>
+            <div>
+                <div class="name inline-block">REMOTE HOST:</div>
+                <div class="remote-host value inline-block"></div>
+            </div>
+            <div>
+                <div class="name inline-block">REMOTE PORT:</div>
+                <div class="remote-port value inline-block"></div>
+            </div>
+            <div>
+                <div class="name inline-block">REMOTE USER:</div>
+                <div class="remote-user value inline-block"></div>
+            </div>
+            <div>
+                <div class="name">PARAMETERS:</div>
+                <div class="params value inline-block"></div>
+            </div>
+            <div>
+                <div class="name">HEADERS:</div>
+                <div class="headers value inline-block"></div>
+            </div>
+            <div>
+                <div class="name">COOKIES:</div>
+                <div class="cookies value inline-block"></div>
+            </div>
+        </div>
+    </div>
+    <div id="container" class="container">
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<arquillian xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns="http://jboss.org/schema/arquillian"
+            xsi:schemaLocation="http://jboss.org/schema/arquillian http://jboss.org/schema/arquillian/arquillian_1_0.xsd">
+
+    <extension qualifier="cube">
+        <property name="connectionMode">STARTANDSTOP</property>
+    </extension>
+
+    <extension qualifier="docker">
+        <property name="definitionFormat">CUBE</property>
+        <property name="dockerContainers">
+            trice:
+              buildImage:
+                dockerfileLocation: ./build/compose/trice/
+                noCache: false
+                remove: true
+              hostName: trice
+              containerName: trice
+              exposedPorts: [8081/tcp]
+              portBindings: [8081/tcp]
+              links:
+                - rabbitmq-trice:rabbitmq-trice
+              await:
+                strategy: polling
+                sleepPollingTime: 10 s
+                iterations: 3
+
+            rabbitmq-trice:
+              buildImage:
+                dockerfileLocation: ./build/compose/rabbitmq-trice/
+                noCache: false
+                remove: true
+              hostName: rabbitmq-trice
+              containerName: rabbitmq-trice
+              exposedPorts: [5672/tcp, 15672/tcp]
+              portBindings: [5672/tcp, 15672/tcp]
+              await:
+                strategy: polling
+                sleepPollingTime: 10 s
+                iterations: 3
+        </property>
+    </extension>
+</arquillian>

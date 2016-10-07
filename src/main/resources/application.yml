@@ -1,0 +1,44 @@
+server:
+  port: 8081
+
+info:
+  version: local
+
+endpoints:
+  shutdown:
+    enabled: false
+
+security:
+  user:
+    name: user
+    password: password
+  basic:
+    path: /mgmt
+  require-ssl: false
+
+management:
+  context-path: /mgmt
+
+spring:
+  thymeleaf:
+    cache: false
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+  session:
+    store-type: none
+
+rabbitmq:
+  host: localhost
+  port: 5672
+  username: guest
+  password: guest
+  exchange-name: trice-exchange
+
+trice:
+  messaging:
+    endpoint: /sockjs
+    queue-expires: 300000
+    queue-name-prefix: trice-queue-

@@ -1,0 +1,147 @@
+buildscript {
+    ext {
+        springBootVersion = '1.4.0.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'spring-boot'
+apply plugin: "jacoco"
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+version = new File('version').text
+
+jar {
+    baseName = 'trice'
+    manifest {
+        attributes 'Implementation-Vendor': 'Alexander Burchak',
+                'Implementation-Title': 'Trice(ratops)',
+                'Implementation-Version': version
+    }
+//    exclude('**/application.yml')
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    providedRuntime
+}
+
+dependencies {
+    compile('io.netty:netty-all:4.0.39.Final')
+    compile('io.projectreactor:reactor-net')
+    compile('org.apache.commons:commons-lang3:3.4')
+    compile('commons-io:commons-io:2.4')
+    compile('org.projectlombok:lombok:1.16.6')
+    compile('org.springframework.boot:spring-boot-actuator')
+    compile('org.springframework.boot:spring-boot-starter-amqp')
+    compile('org.springframework.boot:spring-boot-starter-aop')
+    compile('org.springframework.boot:spring-boot-starter-jersey')
+    compile('org.springframework.boot:spring-boot-starter-logging')
+    compile('org.springframework.boot:spring-boot-starter-validation')
+    compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.springframework.boot:spring-boot-starter-thymeleaf')
+    compile('org.springframework.boot:spring-boot-starter-tomcat')
+    compile('org.springframework.boot:spring-boot-starter-websocket')
+    compile('org.springframework.boot:spring-boot-starter-security')
+    compile('org.springframework.security:spring-security-messaging')
+    compile('org.springframework.session:spring-session')
+
+    testCompile('org.arquillian.cube:arquillian-cube-docker:1.0.0.Alpha14')
+    testCompile('org.jboss.arquillian.testng:arquillian-testng-standalone:1.1.11.Final')
+    testCompile('org.jboss.arquillian.extension:arquillian-drone-webdriver-depchain:2.0.0.Final')
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile('org.springframework.restdocs:spring-restdocs-mockmvc')
+    testCompile('org.testng:testng:6.8.21')
+}
+
+processResources {
+    filesMatching('static/*.txt') {
+        expand(project.properties)
+    }
+}
+
+test {
+    useTestNG()
+}
+
+jacoco {
+    toolVersion = "0.7.7.201606060606"
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        csv.enabled false
+        html.destination "${buildDir}/jacoco/html"
+    }
+}
+
+configurations {
+    itestCompile.extendsFrom testCompile
+    itestRuntime.extendsFrom testRuntime
+}
+
+sourceSets {
+    //todo idea
+    test {
+        resources.srcDir 'src/itest/resources'
+    }
+    itest {
+        compileClasspath += main.output + test.output
+        runtimeClasspath += main.output + test.output
+        java.srcDir 'src/itest/java'
+        resources.srcDir 'src/itest/resources'
+    }
+}
+
+task copyCompose(type: Copy) {
+    dependsOn assemble
+    into("${project.buildDir}")
+    into('compose/') {
+        from "${project.projectDir}/compose/"
+    }
+    into('compose/trice/lib/') {
+        from jar
+        rename { String fileName ->
+            fileName.replaceAll("-\\d\\.\\d\\.\\d(-SNAPSHOT)?", "")
+        }
+    }
+}
+
+task itest(type: Test, description: 'Run integration tests', group: "Verification") {
+    dependsOn copyCompose, test
+    useTestNG()
+    testClassesDir = sourceSets.itest.output.classesDir
+    classpath = sourceSets.itest.runtimeClasspath
+}
+
+task zip(type: Zip) {
+    description = 'Create zip distribution'
+    group "Build"
+    dependsOn build
+    baseName = jar.baseName
+    from ("${project.buildDir}/compose/trice/bin/") {
+        into('bin/')
+        include '*.*'
+    }
+    from ("${project.buildDir}/compose/trice/conf/") {
+        into('conf/')
+        include '*.*'
+    }
+    from (jar) {
+        into('lib/')
+    }
+}
+
+check.dependsOn itest

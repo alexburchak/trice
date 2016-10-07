@@ -1,0 +1,23 @@
+version: '2'
+
+services:
+  # Trice
+  trice:
+    image: trice
+    build: ./build/compose/trice/
+    hostname: trice
+    container_name: trice
+    ports:
+      - "8081:8081"
+    links:
+      - rabbitmq-trice
+
+  # RabbitMQ
+  rabbitmq-trice:
+    image: rabbitmq-trice
+    build: ./build/compose/rabbitmq-trice/
+    hostname: rabbitmq-trice
+    container_name: rabbitmq-trice
+    ports:
+      - "5672:5672"
+      - "15672:15672"
