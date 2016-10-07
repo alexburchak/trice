@@ -31,10 +31,7 @@ spring:
     store-type: none
 
 rabbitmq:
-  host: rabbitmq-trice
-  port: 5672
-  username: guest
-  password: guest
+  uri: amqp://guest:guest@rabbitmq-trice:5672
   exchange-name: trice-exchange
 
 trice:

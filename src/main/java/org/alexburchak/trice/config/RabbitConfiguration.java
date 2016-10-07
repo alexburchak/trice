@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.net.URI;
+
 /**
  * @author alexburchak
  */
@@ -21,24 +23,14 @@ import org.springframework.context.annotation.Configuration;
 @EnableRabbit
 @Getter
 public class RabbitConfiguration {
-    @Value("${rabbitmq.host}")
-    private String host;
-    @Value("${rabbitmq.port}")
-    private int port;
-    @Value("${rabbitmq.username}")
-    private String username;
-    @Value("${rabbitmq.password}")
-    private String password;
+    @Value("${rabbitmq.uri}")
+    private URI uri;
     @Value("${rabbitmq.exchange-name}")
     private String exchangeName;
 
     @Bean
     public ConnectionFactory connectionFactory() {
-        CachingConnectionFactory connectionFactory = new CachingConnectionFactory(host, port);
-        connectionFactory.setUsername(username);
-        connectionFactory.setPassword(password);
-
-        return connectionFactory;
+        return new CachingConnectionFactory(uri);
     }
 
     @Bean
