@@ -18,6 +18,7 @@
     <script type="text/javascript" th:inline="javascript">
         var ws = null;
         var recInterval = null;
+        var recoverable = true;
 
         function connect() {
             if (ws == null) {
@@ -44,16 +45,18 @@
 
                     clearInterval(recInterval);
 
-                    recInterval = setInterval(connect, 1000);
+                    if (recoverable) {
+                        recInterval = setInterval(connect, 1000);
+                    }
                 };
             }
         }
 
         var handler = {
             "TRICE": function(command) {
-                console.log(command);
             },
             "ECIRT": function(command) {
+                recoverable = false;
                 ws.close();
             },
             "REQUEST": function(command) {
@@ -102,7 +105,7 @@
 
 <body onload="connect();">
 <noscript>
-    <h2 style="color: #ff0000" th:text="#{message.javascript.disabled}"></h2>
+    <h2 class="warn" th:text="#{message.javascript.disabled}"></h2>
 </noscript>
 
 <div class="logo">
@@ -111,14 +114,14 @@
 </div>
 
 <div>
-    <div id="hidden" style="display: none">
+    <div id="hidden" class="hidden">
         <div class="param value2">
         </div>
         <div class="header value2">
         </div>
         <div class="cookie value2">
         </div>
-        <div class="fading element">
+        <div class="hidden element">
             <div>
                 <div class="name inline-block">METHOD:</div>
                 <div class="method value inline-block"></div>

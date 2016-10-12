@@ -1,0 +1,74 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-spring4-4.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <link type="text/css" rel="stylesheet" href="/stylesheet.css"/>
+
+    <script src="/jquery-3.1.1.js"></script>
+
+    <script type="text/javascript" th:inline="javascript">
+        var baseUrl = [[${baseUrl}]];
+
+        /*<![CDATA[*/
+
+        function generateSID() {
+            var d = new Date().getTime();
+            if (window.performance && typeof window.performance.now === "function") {
+                d += performance.now(); //use high-precision timer if available
+            }
+            var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                var r = (d + Math.random() * 16) % 16 | 0;
+                d = Math.floor(d / 16);
+                return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+            });
+
+            $("input:text#sid").val(uuid);
+            $("input:text#url").val(baseUrl + "?sid=" + uuid);
+        }
+
+        function validate() {
+            var valid = $("input:text#sid").val().length > 0;
+            $("div#validation").css("display", valid ? "none" : "block");
+            return valid;
+        }
+        /*]]>*/
+    </script>
+
+    <title>Trice(ratops)</title>
+</head>
+
+<body>
+<noscript>
+    <h2 class="warn" th:text="#{message.javascript.disabled}"></h2>
+</noscript>
+
+<div class="logo">
+    <img src="/logo.png" class="logo-img"/>
+    <nobr><div class="logo-text" th:text="#{message.welcome.to.trice}"></div></nobr>
+</div>
+
+<div id="container" class="container">
+    <div id="validation" class="warn hidden" th:text="#{message.sid.is.empty}"></div>
+</div>
+
+<form action="trice" method="get">
+    <div id="container" class="container">
+        <div>
+            <div class="label" th:text="#{message.select.sid}"></div><nobr/>
+            <input id="sid" name="sid" onchange="validate()" onkeydown="validate()" type="text"></input><nobr/>
+            <input name="button" type="button" onclick="generateSID()" th:value="#{message.generate.sid}"></input>
+        </div>
+        <div>
+            <div class="label" th:text="#{message.copy.url}"></div><nobr/>
+            <input id="url" name="url" type="text" readonly="true" disabled="disabled"></input>
+        </div>
+        <div>
+            <div class="label"></div>
+            <input type="submit" onclick="return validate()" th:value="#{message.start}"></input>
+        </div>
+    </div>
+</form>
+</body>
+</html>

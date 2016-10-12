@@ -153,7 +153,7 @@ public class TriceWebSocketHandler extends TextWebSocketHandler {
     }
 
     private void onUnknown(String payload) {
-        log.error("Unknown AMQP message {}", payload);
+        log.error("Unknown message {}", payload);
     }
 
     public synchronized Connection getConnection() {

@@ -106,7 +106,26 @@ $ docker-compose down
 
 ### Deployment to Heroku
 
-&lt;TBD&gt;
+Register on [Heroku](https://www.heroku.com/), install CLI tools from [here](https://devcenter.heroku.com/articles/heroku-command-line), go to the project directory and type
+
+```sh
+$ heroku create
+$ heroku config:set GRADLE_TASK="zip -x test -x itest"
+$ heroku git:remote -a mysterious-fjord-92487
+$ heroku addons:create cloudamqp:lemur
+```
+
+Here, *mysterious-fjord-92487* is a name given to the application by Heroku. Push your changes with *git*, to start deployment:
+
+```sh
+$ git push heroku master
+```
+
+Use following command to start working with the application:
+
+```sh
+heroku open
+```
 
 ## Monitoring the application
 

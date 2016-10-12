@@ -11,7 +11,7 @@ public enum IncomingMessageType {
     /**
      * Handshake like message type
      */
-    TRICE("^TRICE\\s+'(\\w+)'$") {
+    TRICE("^TRICE\\s+'([^\\s]+)'$") {
         protected void visit(IncomingMessageTypeVisitor visitor, String payload) throws IOException {
             visitor.visitTrice(payload);
         }

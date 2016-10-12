@@ -2,6 +2,7 @@ package org.alexburchak.trice.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.alexburchak.trice.controller.HookController;
+import org.alexburchak.trice.controller.IndexController;
 import org.alexburchak.trice.controller.TriceController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -35,6 +36,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/*.png").permitAll()
                 .antMatchers("/*.txt").permitAll()
                 .antMatchers("/*.css").permitAll()
+                .antMatchers(IndexController.PATH_INDEX).permitAll()
                 .antMatchers(TriceController.PATH_TRICE).permitAll()
                 .antMatchers(HookController.PATH_HOOK).permitAll()
                 .antMatchers(triceConfiguration.getEndpoint() + "/**").permitAll()

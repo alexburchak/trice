@@ -14,8 +14,7 @@ import java.util.UUID;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -56,6 +55,8 @@ public class TriceControllerTest extends AbstractTestNGSpringWebAppTests {
                 .perform(MockMvcRequestBuilders.get(TriceController.PATH_TRICE)
                                 .param(TriceController.PARAM_SID, sid)
                 )
+                .andExpect(model().attribute(TriceController.MODEL_ENDPOINT, triceConfiguration.getEndpoint()))
+                .andExpect(model().attribute(TriceController.MODEL_SID, sid))
                 .andExpect(status().isOk())
                 .andExpect(view().name(TriceController.RESULT_SUCCESS));
 
